@@ -78,10 +78,10 @@ app.layout = html.Div([
     html.H2("Odnos", style={"font-size": "60px", "padding": "30px"}),
     dbc.Container([
         dbc.Row([
-            dbc.Col(dcc.Graph(id='pie-graph', className="m-4", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph1', className="m-4", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph2', className="m-4", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph3', className="m-4", style={"width": "90%"}), md=3),
+            dbc.Col(dcc.Graph(id='pie-graph', className="m-3", style={"width": "90%"}), md=3),
+            dbc.Col(dcc.Graph(id='pie-graph1', className="m-3", style={"width": "90%"}), md=3),
+            dbc.Col(dcc.Graph(id='pie-graph2', className="m-3", style={"width": "90%"}), md=3),
+            dbc.Col(dcc.Graph(id='pie-graph3', className="m-3", style={"width": "90%"}), md=3),
         ], className="flex-row flex-wrap")
     ], fluid=True)
 
