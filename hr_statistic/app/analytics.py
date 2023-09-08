@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-
+import os
 class LocateAndLoadData:
     """### Klasa koja ce da locira svaku excel datoteku iz zadatog direktorijuma i kreira objekat DataFrame
         :param|protected_all
@@ -23,6 +23,9 @@ class LocateAndLoadData:
 
     def locate_data(self):
         """### Pronalazimo sve datoteke sa *.xlsx u datom direktorijumu"""
+
+        cwd = os.getcwd()  
+        print("TRENUTNI FOLDER")
 
         folder = Path(self.__path_to_data)
 
@@ -49,8 +52,12 @@ class LocateAndLoadData:
                 print(f"Opening the file: {data}")
                 
                 self.df = pd.read_excel(data, 1)
+                if self.df is None:
+
+                    raise TypeError("NEMA DF JER JE NONE")
+                else:
                 
-                return self.df
+                    return self.df
         
         print("File not found or an unexpected error occurred!")
 class CleanData(LocateAndLoadData):
