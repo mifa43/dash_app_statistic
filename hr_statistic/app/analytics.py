@@ -123,10 +123,12 @@ class Analytic(CleanData):
         :return
         - `DataFrame` -> Daje pandas df za zadate kriterijume
         """
-        # Formatiranje datuma
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d/%m/%Y")
+
+        # Formatiranje datuma kao što ste to već radili
         start_date = pd.to_datetime(start_date, format="%d-%m-%Y")
         end_date = pd.to_datetime(end_date, format="%d-%m-%Y")
-
         self.df.loc[:, "Datum zakazivanja"] = pd.to_datetime(self.df["Datum zakazivanja"], format="%d %B, %Y")
         
         # Kriterijum pretrage
