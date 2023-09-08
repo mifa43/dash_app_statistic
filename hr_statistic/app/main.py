@@ -10,7 +10,7 @@ from datetime import date
 from dash_bootstrap_templates import ThemeChangerAIO, template_from_url
 from plotly.subplots import make_subplots
 from analytics import Analytic
-import datetime
+from datetime import datetime
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
 )
