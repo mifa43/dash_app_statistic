@@ -11,6 +11,10 @@ from dash_bootstrap_templates import ThemeChangerAIO, template_from_url
 from plotly.subplots import make_subplots
 from analytics import Analytic
 from datetime import datetime
+import dash_auth
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'mifa43': 'koliko43'
+}
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
 )
@@ -18,6 +22,10 @@ dbc_css = (
 # Inicijalizacija Dash-a
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc_css])
 server = app.server
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 # Inicijalizacija Dash boostrap tema
 theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.MORPH})
 
