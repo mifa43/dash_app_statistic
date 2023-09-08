@@ -10,7 +10,7 @@ from datetime import date
 from dash_bootstrap_templates import ThemeChangerAIO, template_from_url
 from plotly.subplots import make_subplots
 from analytics import Analytic
-
+import datetime
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
 )
@@ -202,8 +202,10 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
         analytic.clean()
 
         # Formatiranje datuma
-        start_date_object = date.fromisoformat(start_date)
-        end_date_object = date.fromisoformat(end_date)
+        # Konvertovanje datuma u željeni format
+        start_date_object = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+        end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+
 
         filtr_data = analytic.pie_data(start_date_object, end_date_object)
 

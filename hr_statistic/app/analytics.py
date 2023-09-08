@@ -1,7 +1,6 @@
 import pandas as pd
 from pathlib import Path
 import os
-from datetime import datetime
 class LocateAndLoadData:
     """### Klasa koja ce da locira svaku excel datoteku iz zadatog direktorijuma i kreira objekat DataFrame
         :param|protected_all
@@ -123,12 +122,10 @@ class Analytic(CleanData):
         :return
         - `DataFrame` -> Daje pandas df za zadate kriterijume
         """
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d/%m/%Y")
-
-        # Formatiranje datuma kao što ste to već radili
+        # Formatiranje datuma
         start_date = pd.to_datetime(start_date, format="%d-%m-%Y")
         end_date = pd.to_datetime(end_date, format="%d-%m-%Y")
+
         self.df.loc[:, "Datum zakazivanja"] = pd.to_datetime(self.df["Datum zakazivanja"], format="%d %B, %Y")
         
         # Kriterijum pretrage
@@ -142,11 +139,8 @@ class Analytic(CleanData):
         return counts_by_day
     
     def pie_data(self, start_date: str, end_date: str):
-        # Konvertujte ulazne datume u željeni format "dd/mm/yyyy"
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d/%m/%Y")
-
-        # Formatiranje datuma kao što ste to već radili
+        # Formatiranje datuma
+        
         start_date = pd.to_datetime(start_date, format="%d-%m-%Y")
         end_date = pd.to_datetime(end_date, format="%d-%m-%Y")
 
