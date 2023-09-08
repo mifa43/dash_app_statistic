@@ -25,7 +25,7 @@ class LocateAndLoadData:
         """### Pronalazimo sve datoteke sa *.xlsx u datom direktorijumu"""
 
         cwd = os.getcwd()  
-        print("TRENUTNI FOLDER")
+        print("TRENUTNI FOLDER", cwd)
 
         folder = Path(self.__path_to_data)
 
