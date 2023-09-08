@@ -138,8 +138,8 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
         analytic.clean()
 
         # Formatiranje datuma
-        start_date_object = date.fromisoformat(start_date)
-        end_date_object = date.fromisoformat(end_date)
+        start_date_object = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+        end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
 
         # Filtriranje po zadatom parametru
         filtr_data = analytic.filter_by_date(
