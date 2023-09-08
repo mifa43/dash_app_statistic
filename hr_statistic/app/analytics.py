@@ -11,7 +11,7 @@ class LocateAndLoadData:
 
     def __init__(self) -> None:
         
-        self.__path_to_data: str = "/home/mifa43/Desktop/hr_statistic/data"
+        self.__path_to_data: str = "./hr_statistic/app/data"
 
         self.__located_data: list = []
 
