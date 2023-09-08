@@ -17,7 +17,7 @@ dbc_css = (
 
 # Inicijalizacija Dash-a
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc_css])
-
+server = app.server
 # Inicijalizacija Dash boostrap tema
 theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.MORPH})
 
