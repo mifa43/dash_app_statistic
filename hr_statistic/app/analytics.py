@@ -10,7 +10,7 @@ class LocateAndLoadData:
     """
 
     def __init__(self) -> None:
-        
+        # local develop path ./hr_statistic/app
         self.__path_to_data: str = "/opt/render/project/src/hr_statistic/app"
 
         self.__located_data: list = []
@@ -23,9 +23,6 @@ class LocateAndLoadData:
 
     def locate_data(self):
         """### Pronalazimo sve datoteke sa *.xlsx u datom direktorijumu"""
-
-        cwd = os.getcwd()  
-        print("TRENUTNI FOLDER", cwd)
 
         folder = Path(self.__path_to_data)
 
