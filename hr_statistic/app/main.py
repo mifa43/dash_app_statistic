@@ -1,7 +1,7 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
@@ -12,6 +12,7 @@ from plotly.subplots import make_subplots
 from analytics import Analytic
 from datetime import datetime
 import dash_auth
+from collections import OrderedDict
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
 }
@@ -75,7 +76,7 @@ app.layout = html.Div([
     
     dcc.Graph(id="line-plot", className="m-4", style={"width": "94.9%"}),
 
-    html.H2("Odnos", style={"font-size": "60px", "padding": "30px"}),
+    html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "60px", "padding": "30px"}),
     dbc.Container([
         dbc.Row([
             dbc.Col(dcc.Graph(id='pie-graph', className="m-3", style={"width": "90%"}), md=3),
@@ -83,8 +84,29 @@ app.layout = html.Div([
             dbc.Col(dcc.Graph(id='pie-graph2', className="m-3", style={"width": "90%"}), md=3),
             dbc.Col(dcc.Graph(id='pie-graph3', className="m-3", style={"width": "90%"}), md=3),
         ], className="flex-row flex-wrap")
-    ], fluid=True)
+    ], fluid=True),
 
+    html.Div([
+        html.H2("Najcesci razlog odbijanja/odustanka od obuke", style={"font-size": "40px", "padding": "30px"}),
+        dash_table.DataTable(
+            id='data-table',
+            columns=[
+                {'name': 'Razlog', 'id': 'Razlog'}, 
+                {'name': 'Broj ponavljanja', 'id': 'Broj ponavljanja'}
+            ],
+            tooltip_delay=0,
+            tooltip_duration=None,
+            tooltip_data=[],
+            filter_action="native",
+            row_deletable=True,
+            page_action="native",
+            page_current= 0,
+            page_size= 15,
+            style_table={"overflowX": "auto"},
+            data=[]  # Postavite praznu listu kao inicijalne podatke
+        )
+        
+    ], style={"width": "50%", "padding": "15px"})
 
 ], style={"display": "flex", "flexDirection": "column","flexWrap": "wrap"}, className="BABA")
 
@@ -172,7 +194,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             df, 
             x="Datum zakazivanja", 
             y="Broj intervjua", 
-            title=f"Grafikon za {selected_column2} | Ukupan broj intervjua je {intervju_sum} za zadati datum: {start_date_object} / {end_date_object}",
+            title=f"Grafikon za rukovodilca: {selected_column2} | Ukupan broj intervjua je {intervju_sum} za zadati datum: {start_date_object} / {end_date_object}",
             template=template_from_url(theme),
             markers=True
         )
@@ -230,24 +252,29 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             values=values,
             title='Ukupan broj intervjua',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie1 = px.pie(
             names=labels, 
             values=values1,
             title='Ukupan broj primljenih',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie2 = px.pie(
             names=labels, 
             values=values2,
             title='Pristali na obuku',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie3 = px.pie(
             names=labels, 
             values=values3,
             title='Odbili obuku',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
+
         )
 
         return figPie, figPie1, figPie2, figPie3
@@ -259,27 +286,67 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             values=[100],
             title='No Data Available',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie1 = px.pie(
             names=["No Data1"], 
             values=[100],
             title='No Data Available1',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie2 = px.pie(
             names=["No Data1"], 
             values=[100],
             title='No Data Available2',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
         figPie3 = px.pie(
             names=["No Data3"], 
             values=[100],
             title='No Data Available3',
             template=template_from_url(theme),
+            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
 
         return figPie, figPie1, figPie2, figPie3
+@app.callback(
+    Output('data-table', 'data'),
+    Output('data-table', 'tooltip_data'),
+    [
+        Input("dropdown-column1", "value"),
+        Input("date-picker-range", "start_date"), 
+        Input("date-picker-range", "end_date"),
+        Input(ThemeChangerAIO.ids.radio("theme"), "value"),
+    ]
+
+)
+def update_table(selected_column1, start_date, end_date, theme):
+
+    # Proveravamo da li postoje inputi ako ih nema vracamo tabel_data=[], markdown=[]
+    if selected_column1 is not None and start_date is not None and end_date is not None:
+        # Alociramo datoteke
+        analytic.locate_data()
+
+        # Biramo koji excel sheet se analizira
+        analytic.load_data(selected_column1)
+
+        # Pozivanje cistih podataka
+        analytic.clean()
+
+        # Formatiranje datuma
+        # Konvertovanje datuma u željeni format
+        start_date_object = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+        end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+
+        tabel_data, markdown = analytic.refuse_messages_data(start_date_object, end_date_object)
+
+        return tabel_data, markdown
+    
+    else:
+        
+        return [],[]
 
 # Pokretanje servera
 if __name__ == "__main__":
