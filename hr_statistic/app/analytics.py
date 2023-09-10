@@ -49,7 +49,10 @@ class LocateAndLoadData:
 
     def locate_data(self):
         """### Pronalazimo sve datoteke sa *.xlsx u datom direktorijumu"""
+        cwd = os.getcwd()
 
+        # Print the current working directory
+        print("Current working directory:", cwd)
         folder = Path(self.__path_to_data)
 
         if folder.exists() and folder.is_dir():
