@@ -1,0 +1,28 @@
+.dash-tooltip{
+    color: black;
+
+}
+
+#data-table > div.dash-tooltip > div > table > thead > tr > th:nth-child(1){
+    border-width: 2px;
+    border-color: gray;
+    padding: 5px;
+}
+#data-table > div.dash-tooltip > div > table > thead > tr > th:nth-child(2){
+    border-width: 2px;
+    border-color: gray;
+    padding: 5px;
+
+}
+#data-table > div.dash-tooltip > div > table > tbody > tr > td:nth-child(1){
+    border-width: 2px;
+    border-color: gray;
+    padding: 5px;
+
+}
+#data-table > div.dash-tooltip > div > table > tbody > tr > td:nth-child(2){
+    border-width: 2px;
+    border-color: gray;
+    padding: 5px;
+    
+}
