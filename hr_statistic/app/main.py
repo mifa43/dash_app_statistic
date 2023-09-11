@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, dash_table
+from dash import html, dcc, dash_table, no_update
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
@@ -13,6 +13,9 @@ from analytics import Analytic
 from datetime import datetime
 import dash_auth
 from collections import OrderedDict
+from dash.exceptions import PreventUpdate
+global lista
+lista=[]
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
 }
@@ -66,14 +69,43 @@ app.layout = html.Div([
         placeholder="Izaberi rukovodilca.."
     ),
     html.Label("Izaberi opseg datuma:", style={"font-weight": "bold", "padding": "10px"}),
-    dcc.DatePickerRange(
-        id="date-picker-range",
-        start_date_placeholder_text="Datum od",
-        end_date_placeholder_text="Datum do",
-        calendar_orientation='vertical',
-        style={"padding": "10px"}
+    html.Div([
+        
+        dcc.DatePickerRange(
+            id="date-picker-range",
+            start_date_placeholder_text="Datum od",
+            end_date_placeholder_text="Datum do",
+            calendar_orientation='vertical',
+            style={"padding": "10px"}
+        ),
+        dbc.Button('Klikni me', id='dugme', style={"border-radius": "30px"}, className="m-4 dbc"),
+        html.Div(id='ispis'),
+    ], className="d-grid gap-2 d-md-flex justify-content-md"),
+
+    dcc.Loading(
+        id="loading-after-dropdown1",
+        type="default",
+        children=html.Div(id="loading-output-1"),
+        fullscreen=True
     ),
-    
+    dcc.Loading(
+        id="loading-before-line-plot",
+        type="default",
+        children=html.Div(id="loading-output-2"),
+        fullscreen=True
+    ),
+    dcc.Loading(
+        id="loading-before-pie-plot",
+        type="default",
+        children=html.Div(id="loading-output-3"),
+        fullscreen=True
+    ),
+    dcc.Loading(
+        id="loading-before-tabel-plot",
+        type="default",
+        children=html.Div(id="loading-output-4"),
+        fullscreen=True
+    ),
     dcc.Graph(id="line-plot", className="m-4", style={"width": "94.9%"}),
 
     html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "60px", "padding": "30px"}),
@@ -104,6 +136,7 @@ app.layout = html.Div([
             page_size= 15,
             style_table={"overflowX": "auto"},
             data=[]  # Postavite praznu listu kao inicijalne podatke
+            
         )
         
     ], style={"width": "50%", "padding": "15px"})
@@ -113,10 +146,13 @@ app.layout = html.Div([
 
 @app.callback(
     Output("dropdown-column2", "options"),
+    Output("loading-after-dropdown1", "children"),
     Input("dropdown-column1", "value")
 )
 def update_drop_down_column2(selected_value):
-    
+    if not selected_value:
+        raise PreventUpdate
+
     # Alociramo datoteke
     analytic.locate_data()
 
@@ -128,6 +164,7 @@ def update_drop_down_column2(selected_value):
 
     # Postoje samo dve moguce opcije ako input nije onda vrati praznu listu za options
     if selected_value in ["Komercijala", "Telemarketing"]:
+        lista.append("update_drop_down_column2")
 
         rukovodilac = rukovodilac[rukovodilac["Rukovodilac"].notna()]["Rukovodilac"].unique()
 
@@ -138,20 +175,24 @@ def update_drop_down_column2(selected_value):
     # Ako postoje imena vracamo opcije u suprotnom []
     options = [{"label": ruk, "value": ruk} for ruk in rukovodilac]
 
-    return options if options else []
+    return options if options else [], ""
 
 @app.callback(
     Output("line-plot", "figure"),
+    Output("loading-before-line-plot", "children"),
     [
         Input("dropdown-column1", "value"), 
         Input("dropdown-column2", "value"), 
         Input("date-picker-range", "start_date"), 
         Input("date-picker-range", "end_date"),
         Input(ThemeChangerAIO.ids.radio("theme"), "value")
-    ]
+    ],
 )
 def update_line_plot(selected_column1, selected_column2, start_date, end_date, theme):
-
+    # if not selected_column2:
+    #     raise PreventUpdate
+    
+    global lista
     # Prikaz praznog graph-a
     figLine = px.line(template=template_from_url(theme))
 
@@ -199,18 +240,23 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             markers=True
         )
 
-        return figLine
+        lista.append("update_line_plot")
+
+        return figLine, no_update
     
     # Ako nije ispunjen uslov vrati prazan graph a ako je odabran tema primeni je
     else:
-    
-        return figLine.update_layout(title="No Data Available",template=template_from_url(theme))
+
+        figLine.update_layout(title="No Data Available",template=template_from_url(theme))
+
+        return figLine, no_update 
 
 @app.callback(
     Output('pie-graph', 'figure'),
     Output('pie-graph1', 'figure'),
     Output('pie-graph2', 'figure'),
     Output('pie-graph3', 'figure'),
+    Output("loading-before-pie-plot", "children"),
     [
         Input("dropdown-column1", "value"),
         Input("date-picker-range", "start_date"), 
@@ -219,6 +265,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
     ]
 )
 def update_pie_chart(selected_column1, start_date, end_date, theme):
+    
 
     if selected_column1 is not None and start_date is not None and end_date is not None:
         
@@ -274,10 +321,9 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             title='Odbili obuku',
             template=template_from_url(theme),
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
-
         )
-
-        return figPie, figPie1, figPie2, figPie3
+        lista.append("update_pie_chart")
+        return figPie, figPie1, figPie2, figPie3, no_update
     
     else:
         # Ako uslov nije zadovoljen vracamo prazan pie graph sa No data porukom 
@@ -310,10 +356,11 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
 
-        return figPie, figPie1, figPie2, figPie3
+        return figPie, figPie1, figPie2, figPie3, no_update
 @app.callback(
     Output('data-table', 'data'),
     Output('data-table', 'tooltip_data'),
+    Output("loading-before-tabel-plot", "children"),
     [
         Input("dropdown-column1", "value"),
         Input("date-picker-range", "start_date"), 
@@ -323,6 +370,7 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
 
 )
 def update_table(selected_column1, start_date, end_date, theme):
+    
 
     # Proveravamo da li postoje inputi ako ih nema vracamo tabel_data=[], markdown=[]
     if selected_column1 is not None and start_date is not None and end_date is not None:
@@ -341,12 +389,25 @@ def update_table(selected_column1, start_date, end_date, theme):
         end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
 
         tabel_data, markdown = analytic.refuse_messages_data(start_date_object, end_date_object)
+        lista.append("update_table")
 
-        return tabel_data, markdown
+        return tabel_data, markdown, no_update
     
     else:
         
-        return [],[]
+        return [],[], no_update
+# Python funkcija koja će se izvršiti kada se klikne dugme
+@app.callback(
+    Output('ispis', 'children'),
+    Input('dugme', 'n_clicks')
+)
+def ispis_klika(n_clicks):
+    if n_clicks is None:
+        return "Kliknite dugme..."
+    else:
+        print(lista)  # Ispisuje u terminalu
+        lista.clear()
+        return "Kliknuli ste dugme!"
 
 # Pokretanje servera
 if __name__ == "__main__":
