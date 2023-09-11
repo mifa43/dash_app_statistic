@@ -26,3 +26,14 @@
     padding: 5px;
     
 }
+#dugme.m-4{
+    margin: 4px !important; 
+}
+.dash-spinner.dash-default-spinner {
+    margin: 1rem auto;
+    width: 99%;
+    height: 20%;
+    text-align: center;
+    font-size: 50px;
+    margin-left: 1%;
+}
