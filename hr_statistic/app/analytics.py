@@ -37,7 +37,7 @@ class LocateAndLoadData:
 
     def __init__(self) -> None:
         # local develop path ./hr_statistic/app | /opt/render/project/src/hr_statistic/app 
-        self.__path_to_data: str = "/opt/render/project/src/hr_statistic/app "
+        self.__path_to_data: str = "/opt/render/project/src/hr_statistic/app"
 
         self.__located_data: list = []
 
