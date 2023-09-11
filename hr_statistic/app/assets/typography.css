@@ -26,7 +26,7 @@
     padding: 5px;
     
 }
-#dugme.m-4{
+#btn_image.m-4{
     margin: 4px !important; 
 }
 .dash-spinner.dash-default-spinner {
@@ -37,3 +37,4 @@
     font-size: 50px;
     margin-left: 1%;
 }
+
