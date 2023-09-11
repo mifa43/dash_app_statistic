@@ -6,3 +6,4 @@ dash-bootstrap-templates
 gunicorn
 openpyxl
 dash-auth
+python-docx
