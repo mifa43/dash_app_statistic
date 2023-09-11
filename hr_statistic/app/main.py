@@ -78,8 +78,8 @@ app.layout = html.Div([
             calendar_orientation='vertical',
             style={"padding": "10px"}
         ),
-        dbc.Button('Klikni me', id='dugme', style={"border-radius": "30px"}, className="m-4 dbc"),
-        html.Div(id='ispis'),
+        dbc.Button("Download Image", id="btn_image",style={"border-radius": "30px"}, className="m-4 dbc"),
+        dcc.Download(id="download-image")
     ], className="d-grid gap-2 d-md-flex justify-content-md"),
 
     dcc.Loading(
@@ -398,16 +398,19 @@ def update_table(selected_column1, start_date, end_date, theme):
         return [],[], no_update
 # Python funkcija koja će se izvršiti kada se klikne dugme
 @app.callback(
-    Output('ispis', 'children'),
-    Input('dugme', 'n_clicks')
+    Output("download-image", "data"),
+    Input("btn_image", "n_clicks"),
+    prevent_initial_call=True,
 )
 def ispis_klika(n_clicks):
     if n_clicks is None:
-        return "Kliknite dugme..."
+        return ""
     else:
         print(lista)  # Ispisuje u terminalu
         lista.clear()
-        return "Kliknuli ste dugme!"
+        return dcc.send_file(
+            "./hr_statistic/app/tst.py"
+        )
 
 # Pokretanje servera
 if __name__ == "__main__":
