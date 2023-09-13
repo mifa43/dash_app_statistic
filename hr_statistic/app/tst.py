@@ -1,30 +1,44 @@
-global l
-l = []
+# Globalna lista rečnika
+globalna_lista = []
+
+# Funkcija za dodavanje rečnika sa ključem "A" u listu
 def a():
-    inp = str(input("Unesi za a: "))
-    
-    l.append(inp)
+    global globalna_lista
+    for item in globalna_lista:
+        if "A" in item:
+            item.pop("A")
+            return
+    globalna_lista.append({"A": [1, 2, 3]})
 
+# Funkcija za dodavanje rečnika sa ključem "B" u listu
 def b():
-    inp = str(input("Unesi za b: "))
-    l.append(inp)
+    global globalna_lista
+    for item in globalna_lista:
+        if "B" in item:
+            item.pop("B")
+            return
+    globalna_lista.append({"B": [1, 2, 3]})
 
+# Funkcija za proveru da li postoje ključevi "A" i "B" u rečnicima u listi
 def c():
-    print(len1
-    (l))
+    global globalna_lista
+    has_A = any("A" in item for item in globalna_lista)
+    has_B = any("B" in item for item in globalna_lista)
 
-while True:
-    inp = int(input("Unesi br: "))
-
-    if inp == 1:
-        a()
-        c()
-
-    elif inp == 2:
-        b()
-        c()
+    if has_A and has_B:
+        print("Lista sadrži i ključ 'A' i ključ 'B'.")
+    elif has_A:
+        print("Lista sadrži samo ključ 'A'.")
+    elif has_B:
+        print("Lista sadrži samo ključ 'B'.")
     else:
-        break
+        print("Lista ne sadrži ni ključ 'A' ni ključ 'B'.")
+
+# Testiranje funkcija
+a()
+a()
+b()
+c()
 # import pandas as pd
 
 # def format_str(data):
