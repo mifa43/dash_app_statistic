@@ -241,16 +241,17 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             template=template_from_url(theme),
             markers=True
         )
-
+        # Ovaj blok koda odlucuje da li se generise izvestaj za line plot
+        # Svaki put kada se pozove dodaje i ili brise update_line_plot dict
         param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
         for item in globalna_lista:
             if "update_line_plot" in item:
                 if item["update_line_plot"]:
                     item.pop("update_line_plot")
-                    # Uklanjamo prazan rečnik iz liste ako postoji
+                    # Uklanjamo prazan dict iz liste ako postoji
                     if not item:
                         globalna_lista.remove(item)
-                    
+        # Ako generisemo line plot dodajemo param u listu
         globalna_lista.append(param)
 
         return figLine, no_update
@@ -333,7 +334,7 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             template=template_from_url(theme),
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
-
+        # Objasnjenje je isto kao i u line plot
         param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
         for item in globalna_lista:
             if "update_pie_chart" in item:
@@ -427,9 +428,10 @@ def ispis_klika(n_clicks):
     if n_clicks is None:
         return ""
     else:
-
+        # Provera sta se nalazi u listi
         has_A = any("update_line_plot" in item for item in globalna_lista)
         has_B = any("update_pie_chart" in item for item in globalna_lista)
+        # Ako postoji update_line_plot u listi vraca sortiranu lisu update_line_plot kao index 0
         globalna_lista.sort(key=lambda x: x.get("update_line_plot") is not None, reverse=True)
         if has_A and has_B:
             
@@ -444,6 +446,7 @@ def ispis_klika(n_clicks):
         else:
             print(globalna_lista)
             print("Lista ne sadrži ni ključ 'update_line_plot' ni ključ 'update_pie_chart'.")
+        # Vraca file
         return dcc.send_file(download_path)
 # Pokretanje servera
 if __name__ == "__main__":
