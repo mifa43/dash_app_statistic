@@ -115,7 +115,6 @@ class CleanData(LocateAndLoadData):
 
         # Izvlacimo imena rukovodilaca
         get_keys = list(name_variant.keys())
-            
         # Kolika je duzina liste sa imenima rukovodilaca
         for key in range(len(get_keys)):
 
@@ -127,7 +126,7 @@ class CleanData(LocateAndLoadData):
 
         self.df.loc[:, "Datum zakazivanja"] = pd.to_datetime(self.df["Datum zakazivanja"], format="%d %B, %Y")
         
-        self.df.loc["Datum obuke"] = pd.to_datetime(self.df["Datum obuke"], format="%d %B, %Y")
+        self.df["Datum obuke"] = pd.to_datetime(self.df["Datum obuke"], format="%d %B, %Y")
         
         # Odbacivanje redova koji imaju manje od 4 vrednosti
         self.df = self.df.dropna(thresh=4)  
