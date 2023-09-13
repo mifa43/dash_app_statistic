@@ -13,8 +13,15 @@ class ReportsGenerator:
         self.__output_path = "/opt/render/project/src/hr_statistic/app" # /opt/render/project/src/hr_statistic/app    # ./hr_statistic/app
 
 
-    def line_plot_report(self, selected_column1, selected_column2, intervju_sum, start_date, end_date):
-
+    def line_plot_report(self, selected_column1: str, selected_column2: str, intervju_sum: int, start_date: str, end_date: str):
+        """### Funkcija koja generise izvestaj za line plot
+        :param
+        - `selected_column1: str` -> Imerdatoteke
+        - `selected_column2: str` -> Ime rukovodilca
+        - `intervju_sum: int` -> Broj intervjua 
+        - `start_date: str` -> Datum od
+        - `end_date: str` -> Datum do
+        """
         text = f"""
 Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj intervjua {intervju_sum} za vremenski period od {start_date} do {end_date}.
 """
@@ -34,8 +41,14 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
         par_decoration.size = Pt(12)  # Postavljamo fonta na 16 Point-a
         
 
-    def pie_plot_report(self, selected_column1, start_date, end_date, data):
-             
+    def pie_plot_report(self, selected_column1: str, start_date: str, end_date: str, data: list):
+        """### Funkcija koja generise izvestaj za pie plot
+        :param
+        - `selected_column1: str` -> Imerdatoteke
+        - `start_date: str` -> Datum od
+        - `end_date: str` -> Datum do
+        - `data: list` -> Lista moze samo da sadrzi update_line_plot i ili update_pie_chart
+        """
         # Prelazimo na novi list
         self.doc.add_page_break()
 
@@ -74,12 +87,11 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
 
         # Popunjavamo celije sa vrednostima, preskacemo prvi red 
         for i in range(0, len(data[0])):  
-
+            # i je kolona j je red
             # Upisujemo vrednost u svaku od celija
             for j in range(len(data)):
                 
                 cell = table.cell(i+1, j)
-                # i -= 1
                 cell.text = f'{data[j][i]}'
 
 
@@ -87,13 +99,12 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
     def __call__(self, line_data=None, pie_data=None, both_data=None, report_list=[]) -> Any:
         
         """### Svaki put kada pozovemo instacu cuvamo fajl"""
+        # Pre slanja argumenta instanciramo docx
         self.doc = Document()
-        # report_list = list(filter(None, report_list))
+        # Prolazimo kroz listu i trazimo key
         keys_list = [list(d.keys())[0] for d in report_list]
-        # line_data = {i for i in dic if report_list[1]=="update_line_plot"}
-        # k = list(report_list)
-        # print(keys_list)
 
+        # Ako postoji u listi update_line_plot generisi samo njega
         if "update_line_plot" in keys_list and len(keys_list) == 1 and pie_data is None:
             print("update_line_plot")
 
@@ -107,6 +118,7 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                 line_data[4]
                 )
             
+        # Ako postoji u listi update_pie_chart generisi samo njega
         elif "update_pie_chart" in keys_list and len(keys_list) == 1 and line_data is None:
             print("update_pie_chart")
 
@@ -118,7 +130,7 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                 pie_data[2], 
                 pie_data[3]
                 )
-
+        # Ako postoji u listi update_line_plot i update_pie_chart generisi samo njega
         elif "update_line_plot" in keys_list and "update_pie_chart" in keys_list and len(keys_list) == 2 and line_data is None and pie_data is None:
             print("update_line_plot and update_pie_chart")
 
