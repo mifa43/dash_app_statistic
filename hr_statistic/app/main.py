@@ -247,7 +247,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
             try:
                 lista.remove("update_line_plot")
-                lista.append(param)
+                # lista.append(param)
             except ValueError:
                 print("raised exp")
 
@@ -346,7 +346,7 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             try:
 
                 lista.remove("update_pie_chart")
-                lista.append(param)
+                # lista.append(param)
             except ValueError:
                 print("raised exp")
             finally:
