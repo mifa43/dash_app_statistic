@@ -10,10 +10,12 @@ from datetime import date
 from dash_bootstrap_templates import ThemeChangerAIO, template_from_url
 from plotly.subplots import make_subplots
 from analytics import Analytic
+from reports import ReportsGenerator
 from datetime import datetime
 import dash_auth
 from collections import OrderedDict
 from dash.exceptions import PreventUpdate
+from docx import Document
 global lista
 lista=[]
 VALID_USERNAME_PASSWORD_PAIRS = {
@@ -34,7 +36,7 @@ auth = dash_auth.BasicAuth(
 theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.MORPH})
 
 analytic = Analytic()
-
+report = ReportsGenerator(Document())
 figPie = make_subplots(
     rows=1, 
     cols=4, 
@@ -78,7 +80,7 @@ app.layout = html.Div([
             calendar_orientation='vertical',
             style={"padding": "10px"}
         ),
-        dbc.Button("Download Image", id="btn_image",style={"border-radius": "30px"}, className="m-4 dbc"),
+        dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px"}, className="m-4 dbc"),
         dcc.Download(id="download-image")
     ], className="d-grid gap-2 d-md-flex justify-content-md"),
 
@@ -164,7 +166,7 @@ def update_drop_down_column2(selected_value):
 
     # Postoje samo dve moguce opcije ako input nije onda vrati praznu listu za options
     if selected_value in ["Komercijala", "Telemarketing"]:
-        lista.append("update_drop_down_column2")
+        # lista.append("update_drop_down_column2")
 
         rukovodilac = rukovodilac[rukovodilac["Rukovodilac"].notna()]["Rukovodilac"].unique()
 
@@ -239,9 +241,24 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             template=template_from_url(theme),
             markers=True
         )
+        keys_list = [list(d.keys())[0] for d in lista]
 
-        lista.append("update_line_plot")
+        if "update_line_plot" in keys_list:
+            param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
+            try:
+                lista.remove("update_line_plot")
+                lista.append(param)
+            except ValueError:
+                print("raised exp")
 
+            else:
+                lista.append(param)
+            
+
+        else:
+            param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
+            lista.append(param)
+                
         return figLine, no_update
     
     # Ako nije ispunjen uslov vrati prazan graph a ako je odabran tema primeni je
@@ -265,7 +282,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
     ]
 )
 def update_pie_chart(selected_column1, start_date, end_date, theme):
-    
+    cheked = True
 
     if selected_column1 is not None and start_date is not None and end_date is not None:
         
@@ -322,7 +339,23 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             template=template_from_url(theme),
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
-        lista.append("update_pie_chart")
+        keys_list = [list(d.keys())[0] for d in lista]
+        
+        if "update_pie_chart" in keys_list:
+            param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
+            try:
+
+                lista.remove("update_pie_chart")
+                lista.append(param)
+            except ValueError:
+                print("raised exp")
+            else:
+                lista.append(param)
+            # return figPie, figPie1, figPie2, figPie3, no_update
+        else:
+            param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
+            lista.append(param)
+            # return figPie, figPie1, figPie2, figPie3, no_update
         return figPie, figPie1, figPie2, figPie3, no_update
     
     else:
@@ -389,7 +422,7 @@ def update_table(selected_column1, start_date, end_date, theme):
         end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
 
         tabel_data, markdown = analytic.refuse_messages_data(start_date_object, end_date_object)
-        lista.append("update_table")
+        # lista.append("update_table")
 
         return tabel_data, markdown, no_update
     
@@ -406,13 +439,23 @@ def ispis_klika(n_clicks):
     if n_clicks is None:
         return ""
     else:
-        print(lista)  # Ispisuje u terminalu
-        lista.clear()
-        return dcc.send_file(
-            "./hr_statistic/app/tst.py"
-        )
+        if len(lista) == 0:
+            print("list len is 0")
+            return None
+        elif len(lista) > 2:
+            lista.clear()
+        else:
+
+            print(lista)  # Ispisuje u terminalu
+            
+            download_path = report(report_list=lista)
+            lista.clear()
+            # return download_path
+            return dcc.send_file(download_path) # "./hr_statistic/app/tst.py"
 
 # Pokretanje servera
 if __name__ == "__main__":
 
     app.run_server(debug=True)
+
+
