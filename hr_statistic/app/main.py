@@ -251,7 +251,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             except ValueError:
                 print("raised exp")
 
-            else:
+            finally:
                 lista.append(param)
             
 
@@ -349,7 +349,7 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
                 lista.append(param)
             except ValueError:
                 print("raised exp")
-            else:
+            finally:
                 lista.append(param)
             # return figPie, figPie1, figPie2, figPie3, no_update
         else:
