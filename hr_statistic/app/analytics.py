@@ -127,7 +127,7 @@ class CleanData(LocateAndLoadData):
 
         self.df.loc[:, "Datum zakazivanja"] = pd.to_datetime(self.df["Datum zakazivanja"], format="%d %B, %Y")
         
-        self.df["Datum obuke"] = pd.to_datetime(self.df["Datum obuke"], format="%d %B, %Y")
+        self.df.loc["Datum obuke"] = pd.to_datetime(self.df["Datum obuke"], format="%d %B, %Y")
         
         # Odbacivanje redova koji imaju manje od 4 vrednosti
         self.df = self.df.dropna(thresh=4)  
@@ -160,7 +160,7 @@ class Analytic(CleanData):
         new_df = self.df.loc[
             (self.df["Rukovodilac"] == rukovodilac) &
             (self.df["Datum zakazivanja"] >= start_date) & 
-            (self.df["Datum zakazivanja"] < end_date) &
+            (self.df["Datum zakazivanja"] <= end_date) &
             (self.df["Pojavio se"].str.lower() == "da")
             ]
         
@@ -194,18 +194,19 @@ class Analytic(CleanData):
         rezultati_declined = {}
 
         for rukovodilac in rukovodilci:
+            
             # Kriterijum pretrage za svakog rukovodioca
             new_df = self.df.loc[
+                (self.df["Pojavio se"].str.lower() == "da") &
                 (self.df["Rukovodilac"] == rukovodilac) & 
                 (self.df["Datum zakazivanja"] >= start_date) & 
-                (self.df["Datum zakazivanja"] < end_date) & 
-                (self.df["Pojavio se"].str.lower() == "da")
+                (self.df["Datum zakazivanja"] <= end_date)
                 ]
-            
+
             new_df_accepted = self.df.loc[
                 (self.df["Rukovodilac"] == rukovodilac) & 
                 (self.df["Datum zakazivanja"] >= start_date) & 
-                (self.df["Datum zakazivanja"] < end_date) & 
+                (self.df["Datum zakazivanja"] <= end_date) & 
                 (self.df["Pojavio se"].str.lower() == "da") & 
                 (self.df["Status"].str.lower() == "da")
                 ]
@@ -213,7 +214,7 @@ class Analytic(CleanData):
             new_df_traning = self.df.loc[
                 (self.df["Rukovodilac"] == rukovodilac) & 
                 (self.df["Datum zakazivanja"] >= start_date) & 
-                (self.df["Datum zakazivanja"] < end_date) & 
+                (self.df["Datum zakazivanja"] <= end_date) & 
                 (self.df["Pojavio se"].str.lower() == "da") & 
                 (self.df["Status"].str.lower() == "da") & 
                 (self.df["Datum obuke"].notna())
@@ -222,7 +223,7 @@ class Analytic(CleanData):
             new_df_traning_declined = self.df.loc[
                 (self.df["Rukovodilac"] == rukovodilac) & 
                 (self.df["Datum zakazivanja"] >= start_date) & 
-                (self.df["Datum zakazivanja"] < end_date) & 
+                (self.df["Datum zakazivanja"] <= end_date) & 
                 (self.df["Pojavio se"].str.lower() == "da") & 
                 (self.df["Status"].str.lower() == "da") & 
                 (self.df["Datum obuke"].isnull() | (self.df["Datum obuke"] == pd.NaT))
@@ -237,18 +238,17 @@ class Analytic(CleanData):
             ukupan_broj_obuka = len(new_df_traning)
 
             ukupan_broj_declined = len(new_df_traning_declined)
-            
             # Nesme da se prikaze 0
-            if ukupan_broj_intervjua > 0 and ukupan_broj_primljenih > 0 and ukupan_broj_obuka > 0 and ukupan_broj_declined > 0:
+            if ukupan_broj_intervjua > 0:
                 
                 rezultati[rukovodilac] = ukupan_broj_intervjua
-
+   
                 rezultati_acepted[rukovodilac] = ukupan_broj_primljenih
 
                 rezultati_obuka[rukovodilac] = ukupan_broj_obuka
 
                 rezultati_declined[rukovodilac] = ukupan_broj_declined
-
+                
         return rezultati, rezultati_acepted, rezultati_obuka, rezultati_declined
     
     def refuse_messages_data(self, start_date: str, end_date: str):
@@ -334,12 +334,12 @@ class Analytic(CleanData):
 
 # l.clean()
 
-# l.refuse_messages_data("01-01-2023", "30-09-2023")
+# # l.refuse_messages_data("01-01-2023", "30-09-2023")
 
-# print(y)
+# # print(y)
 
-# ch = l.pie_data("01-01-2023", "30-09-2023")
-
+# ch = l.pie_data("01-06-2023", "30-06-2023")
+# print(f"{ch[0]}\n{ch[1]}\n{ch[2]}\n{ch[3]}")
 # num = 0
 # for k,v in zip(ch[2].keys(), ch[2].values()):
 #     x = v
