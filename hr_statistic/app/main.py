@@ -16,8 +16,8 @@ import dash_auth
 from collections import OrderedDict
 from dash.exceptions import PreventUpdate
 from docx import Document
-global lista
-lista=[]
+
+globalna_lista = []
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
 }
@@ -33,7 +33,7 @@ auth = dash_auth.BasicAuth(
     VALID_USERNAME_PASSWORD_PAIRS
 )
 # Inicijalizacija Dash boostrap tema
-theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.MORPH})
+theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.SLATE})
 
 analytic = Analytic()
 report = ReportsGenerator(Document())
@@ -194,7 +194,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
     # if not selected_column2:
     #     raise PreventUpdate
     
-    global lista
+    global globalna_lista
     # Prikaz praznog graph-a
     figLine = px.line(template=template_from_url(theme))
 
@@ -241,24 +241,18 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
             template=template_from_url(theme),
             markers=True
         )
-        keys_list = [list(d.keys())[0] for d in lista]
 
-        if "update_line_plot" in keys_list:
-            param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
-            try:
-                lista.remove("update_line_plot")
-                # lista.append(param)
-            except ValueError:
-                print("raised exp")
+        param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
+        for item in globalna_lista:
+            if "update_line_plot" in item:
+                if item["update_line_plot"]:
+                    item.pop("update_line_plot")
+                    # Uklanjamo prazan rečnik iz liste ako postoji
+                    if not item:
+                        globalna_lista.remove(item)
+                    
+        globalna_lista.append(param)
 
-            finally:
-                lista.append(param)
-            
-
-        else:
-            param = {"update_line_plot": [selected_column1, selected_column2, intervju_sum, start_date_object, end_date_object]}
-            lista.append(param)
-                
         return figLine, no_update
     
     # Ako nije ispunjen uslov vrati prazan graph a ako je odabran tema primeni je
@@ -282,7 +276,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
     ]
 )
 def update_pie_chart(selected_column1, start_date, end_date, theme):
-    cheked = True
+    global globalna_lista
 
     if selected_column1 is not None and start_date is not None and end_date is not None:
         
@@ -339,23 +333,17 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             template=template_from_url(theme),
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
-        keys_list = [list(d.keys())[0] for d in lista]
-        
-        if "update_pie_chart" in keys_list:
-            param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
-            try:
 
-                lista.remove("update_pie_chart")
-                # lista.append(param)
-            except ValueError:
-                print("raised exp")
-            finally:
-                lista.append(param)
-            # return figPie, figPie1, figPie2, figPie3, no_update
-        else:
-            param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
-            lista.append(param)
-            # return figPie, figPie1, figPie2, figPie3, no_update
+        param = {"update_pie_chart": [selected_column1, start_date_object, end_date_object, [labels, values, values1, values2, values3]]}
+        for item in globalna_lista:
+            if "update_pie_chart" in item:
+                if item["update_pie_chart"]:
+                    item.pop("update_pie_chart")
+                    # Uklanjamo prazan rečnik iz liste ako postoji
+                    if not item:
+                        globalna_lista.remove(item)
+        globalna_lista.append(param)
+
         return figPie, figPie1, figPie2, figPie3, no_update
     
     else:
@@ -422,7 +410,6 @@ def update_table(selected_column1, start_date, end_date, theme):
         end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
 
         tabel_data, markdown = analytic.refuse_messages_data(start_date_object, end_date_object)
-        # lista.append("update_table")
 
         return tabel_data, markdown, no_update
     
@@ -436,23 +423,28 @@ def update_table(selected_column1, start_date, end_date, theme):
     prevent_initial_call=True,
 )
 def ispis_klika(n_clicks):
+    global globalna_lista
     if n_clicks is None:
         return ""
     else:
-        if len(lista) == 0:
-            print("list len is 0")
-            return None
-        elif len(lista) > 2:
-            lista.clear()
-        else:
 
-            print(lista)  # Ispisuje u terminalu
+        has_A = any("update_line_plot" in item for item in globalna_lista)
+        has_B = any("update_pie_chart" in item for item in globalna_lista)
+        globalna_lista.sort(key=lambda x: x.get("update_line_plot") is not None, reverse=True)
+        if has_A and has_B:
             
-            download_path = report(report_list=lista)
-            lista.clear()
-            # return download_path
-            return dcc.send_file(download_path) # "./hr_statistic/app/tst.py"
-
+            print(globalna_lista)
+            download_path = report(report_list=globalna_lista)
+        elif has_A:
+            print(globalna_lista)
+            download_path = report(report_list=globalna_lista)
+        elif has_B:
+            print(globalna_lista)
+            download_path = report(report_list=globalna_lista)
+        else:
+            print(globalna_lista)
+            print("Lista ne sadrži ni ključ 'update_line_plot' ni ključ 'update_pie_chart'.")
+        return dcc.send_file(download_path)
 # Pokretanje servera
 if __name__ == "__main__":
 
