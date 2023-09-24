@@ -37,7 +37,7 @@ class LocateAndLoadData:
 
     def __init__(self) -> None:
         # local develop path ./hr_statistic/app | /opt/render/project/src/hr_statistic/app
-        self.__path_to_data: str = "/opt/render/project/src/hr_statistic/app"
+        self.__path_to_data: str = "/home/mifa43/Desktop/dash_app_statistic/hr_statistic/app"
 
         self.__located_data: list = []
 
@@ -55,13 +55,13 @@ class LocateAndLoadData:
         # print("Current working directory:", cwd)
 
         folder = Path(self.__path_to_data)
-
+        print(folder)
         if folder.exists() and folder.is_dir():
 
             is_file_excel = folder.glob("*.xlsx")
             
             for file in is_file_excel:
-
+                
                 self.__located_data.append(file)
 
     def load_data(self, option: str = None):
@@ -77,7 +77,7 @@ class LocateAndLoadData:
             if (option is None or option.lower() in str(data).lower()) and data.exists():
                 
                 print(f"Opening the file: {data}")
-                
+                # VAZNA NAPOMENA AKO SE JAVI GRESKA BUDI SIGURAN DA OTVARAS SHEET "Tabela" I TREBA DA BUDE DRUGI PO REDU idx[1]
                 self.df = pd.read_excel(data, 1)
                 if self.df is None:
 
@@ -267,7 +267,7 @@ class Analytic(CleanData):
         # Konvertujemo sve u str cak i nan kako bi izbegli gresku koju javlja unarni operator  ~ 
         self.df.loc[:, "Razlog"] = self.df["Razlog"].astype(str)    
 
-        # Filtriranje podataka odbacujemo sve sto pocinje sa ~ (odusta
+        # Filtriranje podataka odbacujemo sve sto pocinje sa ~ (odusta >>>> TypeError: bad operand type for unary ~: 'float' MORA DA BUDE STRING JER KORISTIMO UNARNO ~ bitwise NOT
         messages = self.df.loc[
             (~self.df["Razlog"].str.startswith("(odusta")) & 
             (self.df["Datum zakazivanja"] >= start_date) & 
@@ -323,6 +323,17 @@ class Analytic(CleanData):
             tabel_list.append(text_format)
 
         return unique_messages_to_dict, tabel_list
+    
+    # def ratio_of_assigned_by_manager(self, start_date, end_date):
+        
+    #     new_df_traning_declined = self.df.loc[
+    #         (self.df["Rukovodilac"] == rukovodilac) & 
+    #         (self.df["Datum zakazivanja"] >= start_date) & 
+    #         (self.df["Datum zakazivanja"] <= end_date) & 
+    #         (self.df["Pojavio se"].str.lower() == "da") & 
+    #         (self.df["Status"].str.lower() == "da") & 
+    #         (self.df["Datum obuke"].isnull() | (self.df["Datum obuke"] == pd.NaT))
+    #     ]
 
         
 # l = Analytic()
