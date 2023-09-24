@@ -9,14 +9,15 @@ import numpy as np
 from datetime import date
 from dash_bootstrap_templates import ThemeChangerAIO, template_from_url
 from plotly.subplots import make_subplots
-from analytics import Analytic
-from reports import ReportsGenerator
 from datetime import datetime
 import dash_auth
 from collections import OrderedDict
 from dash.exceptions import PreventUpdate
 from docx import Document
-
+from analytics import Analytic
+from reports import ReportsGenerator
+from dropboxClient import DropBoxConnection
+import time
 globalna_lista = []
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
@@ -79,6 +80,21 @@ app.layout = html.Div([
             end_date_placeholder_text="Datum do",
             calendar_orientation='vertical',
             style={"padding": "10px"}
+        ),
+        dbc.Button('Dropbox pull', id='buttonDbx', style={"border-radius": "30px"}, className="m-4 dbc"),
+        dbc.Modal([
+            dbc.ModalHeader("Molimo vas da odobrite pristup Dropboxu !"),
+            dbc.ModalBody([
+                html.A(id="link_output", children="Autentifikuj se i preuzmi verifikacioni kod.", href="", target="_blank", style={"margin-bottom": "5px"}),  # Klikabilan link
+                dbc.Input(type="text", placeholder="Unesi verifikacioni kod: ", id="inp_auth_code", className="mb-2"),
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Zatvori", id="close", className="ml-auto", n_clicks=0),
+                dbc.Button("Verifikuj kod", id="auth_code", className="ml-auto", n_clicks=0),
+            ]),
+        ],
+        id="modal",
+        is_open=False,
         ),
         dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px"}, className="m-4 dbc"),
         dcc.Download(id="download-image")
@@ -144,6 +160,61 @@ app.layout = html.Div([
     ], style={"width": "50%", "padding": "15px"})
 
 ], style={"display": "flex", "flexDirection": "column","flexWrap": "wrap"}, className="BABA")
+
+@app.callback(
+    Output("modal", "is_open"),
+    Output("link_output", "href"),
+    [Input("buttonDbx", "n_clicks"),
+     Input("close", "n_clicks"),
+     Input("auth_code", "n_clicks")],
+    [State("modal", "is_open"),
+     State("inp_auth_code", "value")]
+)
+def toggle_modal(n1, n2, n3, is_open, auth_code):
+    # Kreiramo instancu
+    d = DropBoxConnection()
+
+    # Saljemo link za autentifikaciju 
+    auth_link = d.allow_access()
+    # Proveravamo inpute i state
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    if "buttonDbx" in changed_id:
+
+        # Otvaramo poup i ispisujemo link
+        is_open = True
+
+        link = auth_link
+
+    elif "close" in changed_id:
+
+        # Zatvaramo porozor
+        is_open = False
+
+        link = ""
+
+    elif "auth_code" in changed_id:
+
+        # Ako je unet auth_code saljemo ga i zapocinjemo sesiju za download
+        res = d.download_files(
+            ["/test/KOMERCIJALA - OPTI - BETA.xlsx", 
+             "/test/TELEMARKETING OPTI - BETA(1).xlsx"
+             ], 
+            ["/opt/render/project/src/hr_statistic/app/KOMERCIJALA - OPTI - BETA.xlsx", 
+             "/opt/render/project/src/hr_statistic/app/TELEMARKETING OPTI - BETA(1).xlsx"
+             ],
+             auth_code
+            )
+        print(res)
+        link = auth_link  # Vrednost href je auth link
+
+        is_open = False
+    else:
+
+        link = ""
+    
+    return is_open, link
+
 
 
 @app.callback(
@@ -428,6 +499,7 @@ def ispis_klika(n_clicks):
     if n_clicks is None:
         return ""
     else:
+        
         # Provera sta se nalazi u listi
         has_A = any("update_line_plot" in item for item in globalna_lista)
         has_B = any("update_pie_chart" in item for item in globalna_lista)
@@ -435,16 +507,16 @@ def ispis_klika(n_clicks):
         globalna_lista.sort(key=lambda x: x.get("update_line_plot") is not None, reverse=True)
         if has_A and has_B:
             
-            print(globalna_lista)
+            # print(globalna_lista)
             download_path = report(report_list=globalna_lista)
         elif has_A:
-            print(globalna_lista)
+            # print(globalna_lista)
             download_path = report(report_list=globalna_lista)
         elif has_B:
             print(globalna_lista)
             download_path = report(report_list=globalna_lista)
         else:
-            print(globalna_lista)
+            # print(globalna_lista)
             print("Lista ne sadrži ni ključ 'update_line_plot' ni ključ 'update_pie_chart'.")
         # Vraca file
         return dcc.send_file(download_path)
