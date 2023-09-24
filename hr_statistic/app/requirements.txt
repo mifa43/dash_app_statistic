@@ -7,3 +7,4 @@ gunicorn
 openpyxl
 dash-auth
 python-docx
+dropbox==11.36.2
