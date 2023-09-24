@@ -29,6 +29,9 @@
 #btn_image.m-4{
     margin: 4px !important; 
 }
+#buttonDbx.m-4{
+    margin: 4px !important; 
+}
 .dash-spinner.dash-default-spinner {
     margin: 1rem auto;
     width: 99%;
@@ -37,4 +40,3 @@
     font-size: 50px;
     margin-left: 1%;
 }
-
