@@ -14,11 +14,15 @@ import dash_auth
 from collections import OrderedDict
 from dash.exceptions import PreventUpdate
 from docx import Document
+import time
+import os
+import subprocess
 from analytics import Analytic
 from reports import ReportsGenerator
 from dropboxClient import DropBoxConnection
-import time
-import os
+# Izvrši nadogradnju pip-a
+subprocess.call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'])
+
 globalna_lista = []
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
