@@ -10,7 +10,7 @@ class ReportsGenerator:
         
         self.doc = doc
 
-        self.__output_path = "/opt/render/project/src/hr_statistic/app" # /opt/render/project/src/hr_statistic/app    # ./hr_statistic/app
+        self.__output_path = f"{os.getenv('LOC_ROOT_PATH')}" # /opt/render/project/src/hr_statistic/app    # ./hr_statistic/app
 
 
     def line_plot_report(self, selected_column1: str, selected_column2: str, intervju_sum: int, start_date: str, end_date: str):

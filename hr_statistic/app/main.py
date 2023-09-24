@@ -18,6 +18,7 @@ from analytics import Analytic
 from reports import ReportsGenerator
 from dropboxClient import DropBoxConnection
 import time
+import os
 globalna_lista = []
 VALID_USERNAME_PASSWORD_PAIRS = {
     'mifa43': 'koliko43'
@@ -197,11 +198,11 @@ def toggle_modal(n1, n2, n3, is_open, auth_code):
 
         # Ako je unet auth_code saljemo ga i zapocinjemo sesiju za download
         res = d.download_files(
-            ["/test/KOMERCIJALA - OPTI - BETA.xlsx", 
-             "/test/TELEMARKETING OPTI - BETA(1).xlsx"
+            [f"{os.getenv('DBX_KOM_PATH')}", 
+             f"{os.getenv('DBX_CC_PATH')}"
              ], 
-            ["/opt/render/project/src/hr_statistic/app/KOMERCIJALA - OPTI - BETA.xlsx", 
-             "/opt/render/project/src/hr_statistic/app/TELEMARKETING OPTI - BETA(1).xlsx"
+            [f"{os.getenv('LOC_DOWNLOAD_PATH_KOM')}", 
+             f"{os.getenv('LOC_DOWNLOAD_PATH_CC')}"
              ],
              auth_code
             )
