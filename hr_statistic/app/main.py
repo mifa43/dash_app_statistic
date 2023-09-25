@@ -21,11 +21,11 @@ from analytics import Analytic
 from reports import ReportsGenerator
 from dropboxClient import DropBoxConnection
 # Izvrši nadogradnju pip-a
-subprocess.call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'])
+# subprocess.call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'])
 
 globalna_lista = []
 VALID_USERNAME_PASSWORD_PAIRS = {
-    'mifa43': 'koliko43'
+    f"{os.getenv('DASH_USER')}": f"{os.getenv('DASH_USER_PASS')}"
 }
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.1/dbc.min.css"
@@ -62,7 +62,7 @@ app.layout = html.Div([
             {"label": "Komercijala", "value": "Komercijala"},
             {"label": "Telemarketing", "value": "Telemarketing"}
         ],
-        style={"color": "black"},
+        style={"color": "black", "width": "100%"},
         className="m-1",
         value=None,
         placeholder="Izaberi podatke za analiziranje.."
@@ -71,7 +71,7 @@ app.layout = html.Div([
     dcc.Dropdown(
         id="dropdown-column2",
         options=[],
-        style={"color": "black"},
+        style={"color": "black", "width": "100%"},
         className="m-1",
         value=None,
         placeholder="Izaberi rukovodilca.."
@@ -84,9 +84,9 @@ app.layout = html.Div([
             start_date_placeholder_text="Datum od",
             end_date_placeholder_text="Datum do",
             calendar_orientation='vertical',
-            style={"padding": "10px"}
+            style={"padding": "10px", "margin-top": "24px"}
         ),
-        dbc.Button('Dropbox pull', id='buttonDbx', style={"border-radius": "30px"}, className="m-4 dbc"),
+        dbc.Button('Dropbox pull', id='buttonDbx', style={"border-radius": "30px", "width": "10%"}, className="m-4 dbc"),
         dbc.Modal([
             dbc.ModalHeader("Molimo vas da odobrite pristup Dropboxu !"),
             dbc.ModalBody([
@@ -101,7 +101,7 @@ app.layout = html.Div([
         id="modal",
         is_open=False,
         ),
-        dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px"}, className="m-4 dbc"),
+        dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px", "width": "10%", "margin": "0px"}, className="m-4 dbc"),
         dcc.Download(id="download-image")
     ], className="d-grid gap-2 d-md-flex justify-content-md"),
 
@@ -140,7 +140,18 @@ app.layout = html.Div([
             dbc.Col(dcc.Graph(id='pie-graph3', className="m-3", style={"width": "90%"}), md=3),
         ], className="flex-row flex-wrap")
     ], fluid=True),
-
+    html.H2("Odnos dodeljenih ljudi po timu", style={"font-size": "40px", "padding": "30px"}),
+    html.Div([
+        dcc.Dropdown(
+            id="dropdown-bar",
+            options=[],
+            style={"color": "black", "width": "97.6%", "margin": "0px auto", "margin-left": "0.4%"},
+            className="m-1",
+            value=None,
+            placeholder="Izaberi tim.."
+        ),
+        dcc.Graph(id="bar-plot", className="m-3", style={"width": "94.9%"}),
+    ]),
     html.Div([
         html.H2("Najcesci razlog odbijanja/odustanka od obuke", style={"font-size": "40px", "padding": "30px"}),
         dash_table.DataTable(
@@ -493,6 +504,32 @@ def update_table(selected_column1, start_date, end_date, theme):
     else:
         
         return [],[], no_update
+    
+@app.callback(
+    Output("dropdown-bar", "options"),
+    Output("bar-plot", "figure"),
+    [
+        Input("dropdown-bar", "value"),
+        Input("dropdown-column1", "value"),
+        Input(ThemeChangerAIO.ids.radio("theme"), "value"),
+    ]
+)
+def bar_plot(selected_team, dropdown_column1, theme):
+
+    if dropdown_column1 is not None:
+        check = lambda: ["Sparta", "Cukarica", "Strumfovi", "Voda", "ZTP"] if dropdown_column1 == "Komercijala" else ["Sparta", "Cukarica", "Strumfovi", "Voda telemarketing"]
+        options = check()
+        # if selected_team
+
+        return options, None
+    else:
+        bar = px.bar(
+            title='No Data Available',
+            template=template_from_url(theme),
+        )
+        return [],bar
+
+
 # Python funkcija koja će se izvršiti kada se klikne dugme
 @app.callback(
     Output("download-image", "data"),
