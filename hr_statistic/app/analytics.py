@@ -250,6 +250,16 @@ class Analytic(CleanData):
                 
         return rezultati, rezultati_acepted, rezultati_obuka, rezultati_declined
     
+    def assigned_people_per_team(self):
+        sales = {
+            "sparta": [],
+            "cukarica": [],
+            "strumfovi": [],
+            "voda": [],
+            "ztp": []
+            }
+        pass
+
     def refuse_messages_data(self, start_date: str, end_date: str):
         """### Metoda koja analizira podatke za Dash tabel
         :param
