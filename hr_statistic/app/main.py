@@ -211,7 +211,7 @@ def toggle_modal(n1, n2, n3, is_open, auth_code):
 
     elif "auth_code" in changed_id:
 
-        # Ako je unet auth_code saljemo ga i zapocinjemo sesiju za download
+        # Ako je unet auth_code saljemo ga i zapocinjemo sesiju za download DBX_KOM_PATH 
         res = d.download_files(
             [f"{os.getenv('DBX_KOM_PATH')}", 
              f"{os.getenv('DBX_CC_PATH')}"
