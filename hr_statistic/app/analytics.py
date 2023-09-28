@@ -75,7 +75,7 @@ class LocateAndLoadData:
 
             # Ako je opcija = Komercijala otvaramo datoteku za kom, moze da bude i Telemarketing
             if (option is None or option.lower() in str(data).lower()) and data.exists():
-                
+                self.op = option
                 print(f"Opening the file: {data}")
                 # VAZNA NAPOMENA AKO SE JAVI GRESKA BUDI SIGURAN DA OTVARAS SHEET "Tabela" I TREBA DA BUDE DRUGI PO REDU idx[1]
                 self.df = pd.read_excel(data, 1)
@@ -250,15 +250,55 @@ class Analytic(CleanData):
                 
         return rezultati, rezultati_acepted, rezultati_obuka, rezultati_declined
     
-    def assigned_people_per_team(self):
+    def assigned_people_per_team(self, selected_team:str, start_date: str, end_date: str):
+        """### Funkcija koja ce prikazati broj dodeljenih ljudi i grupisati po timovima
+        :param
+        - `start_date: str` -> datum od
+        - `end_date: str` -> datum do
+        
+        :return
+        - `new_df: DataFrame` -> Filtriran df po tim paternu(sales, telemarketing) i grupisanje
+
+                """
+        # Formatiranje datuma
+        start_date = pd.to_datetime(start_date, format="%d-%m-%Y")
+        end_date = pd.to_datetime(end_date, format="%d-%m-%Y")
+
+        # Patern kako su ljudi podeljeni po timovima
         sales = {
-            "sparta": [],
-            "cukarica": [],
-            "strumfovi": [],
-            "voda": [],
-            "ztp": []
+            "sparta": ["Mirče", "Slavče", "Boba", "Darko J.", "Ivan", "Darko/Boba"],
+            "čukarica": ["Raša", "Pavle"],
+            "štrumfovi": ["Joca Vulić", "Čeda", "Peđa", "Gogi"],
+            "voda": ["Aleksa", "Nemanja Božinovski", "Zlatko", "Darko"],
+            "ztp": ["Luka", "Mira Vukmir"],
+            "no_section": ["Veljović"]
             }
-        pass
+        telemarketing = {
+            "sparta": ["Kris", "Anita", "Milica", "Anđela Ilić", "Maki", "Mara"],
+            "čukarica": ["Anči", "Ivana"],
+            "štrumfovi": ["Tića", "Marija", "Dejana"],
+            "voda telemarketing": ["Anđela", "Aleksandra", "Ksenija", "Nina", "Nevena"],
+            "ztp": ["Milica ZTP, Mira", "Vesna"],
+            "no_section": []
+            }
+        # Kreiranje inverznog mapiranja: Menadzer -> Tim
+        inverzno_mapiranje = {osoba: tim for tim, osobe in (telemarketing.items() if self.op.lower() == "telemarketing" else sales.items()) for osoba in osobe}
+
+        # Dodavanje nove kolone sa timovima u postojeci df
+        self.df["Tim"] = self.df["Menadzer"].map(inverzno_mapiranje)
+
+        # Filtriranje podataka po datum
+        self.df = self.df[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date)]
+
+        # Ako je izabrani tim definisan, primenite filtriranje
+        if selected_team:
+            self.df = self.df[self.df["Tim"] == selected_team]
+
+        # Kreiranje DataFrame-a sa grupisanim podacima
+        grupisani_df = self.df.groupby(["Tim", "Menadzer"]).size().reset_index(name="Broj dodeljenih ljudi")
+        # print(grupisani_df)
+        return grupisani_df
+
 
     def refuse_messages_data(self, start_date: str, end_date: str):
         """### Metoda koja analizira podatke za Dash tabel
@@ -334,26 +374,17 @@ class Analytic(CleanData):
 
         return unique_messages_to_dict, tabel_list
     
-    # def ratio_of_assigned_by_manager(self, start_date, end_date):
-        
-    #     new_df_traning_declined = self.df.loc[
-    #         (self.df["Rukovodilac"] == rukovodilac) & 
-    #         (self.df["Datum zakazivanja"] >= start_date) & 
-    #         (self.df["Datum zakazivanja"] <= end_date) & 
-    #         (self.df["Pojavio se"].str.lower() == "da") & 
-    #         (self.df["Status"].str.lower() == "da") & 
-    #         (self.df["Datum obuke"].isnull() | (self.df["Datum obuke"] == pd.NaT))
-    #     ]
-
         
 # l = Analytic()
 
 # l.locate_data()
 
-# l.load_data("Komercijala")
+# l.load_data("Telemarketing")
 
 # l.clean()
 
+# d = l.assigned_people_per_team("sparta","01-09-2023", "30-09-2023")
+# print(d)
 # # l.refuse_messages_data("01-01-2023", "30-09-2023")
 
 # # print(y)
