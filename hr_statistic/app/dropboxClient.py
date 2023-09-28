@@ -73,7 +73,6 @@ class DropBoxConnection(Analytic):
             dbx = self.get_dropbox_client(auth_code)
 
             for dbx_path, loc_path  in zip(remote_path, local_path):
-
                 
                 dbx.files_download_to_file(download_path=loc_path, path=dbx_path)
 
