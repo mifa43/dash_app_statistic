@@ -544,6 +544,9 @@ def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
                 title='Broj dodeljenih kandidata po timu',
                 template=template_from_url(theme),
             )
+            bar.update_traces(texttemplate='%{y}', textposition='outside')
+
+
             return options, bar 
         else:
             bar = px.bar(
