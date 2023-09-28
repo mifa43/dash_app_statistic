@@ -39,7 +39,7 @@ auth = dash_auth.BasicAuth(
     VALID_USERNAME_PASSWORD_PAIRS
 )
 # Inicijalizacija Dash boostrap tema
-theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.SLATE})
+theme_change = ThemeChangerAIO(aio_id="theme", radio_props={"value":dbc.themes.VAPOR})
 
 analytic = Analytic()
 report = ReportsGenerator(Document())
@@ -511,19 +511,50 @@ def update_table(selected_column1, start_date, end_date, theme):
     [
         Input("dropdown-bar", "value"),
         Input("dropdown-column1", "value"),
+        Input("date-picker-range", "start_date"), 
+        Input("date-picker-range", "end_date"),
         Input(ThemeChangerAIO.ids.radio("theme"), "value"),
     ]
 )
-def bar_plot(selected_team, dropdown_column1, theme):
+def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
 
     if dropdown_column1 is not None:
-        check = lambda: ["Sparta", "Cukarica", "Strumfovi", "Voda", "ZTP"] if dropdown_column1 == "Komercijala" else ["Sparta", "Cukarica", "Strumfovi", "Voda telemarketing"]
+        check = lambda: ["Sparta", "Čukarica", "Štrumfovi", "Voda", "ZTP", "no_section"] if dropdown_column1 == "Komercijala" else ["Sparta", "Čukarica", "Štrumfovi", "Voda telemarketing", "ZTP", "No_section"]
         options = check()
-        # if selected_team
+        if selected_team is not None:
+            # Formatiranje datuma
 
-        return options, None
+            start_date_object = datetime.strptime(start_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+            end_date_object = datetime.strptime(end_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+
+            # Alociramo datoteke
+            analytic.locate_data()
+
+            # Biramo koji excel sheet se analizira
+            analytic.load_data(dropdown_column1)
+
+            # Pozivanje cistih podataka
+            analytic.clean()
+            data = analytic.assigned_people_per_team(selected_team.lower(), start_date_object, end_date_object)
+            print(data)
+            bar = px.bar(
+                data,
+                x="Menadzer",
+                y="Broj dodeljenih ljudi",
+                title='Broj dodeljenih kandidata po timu',
+                template=template_from_url(theme),
+            )
+            return options, bar 
+        else:
+            bar = px.bar(
+                title='Broj dodeljenih kandidata po timu',
+                template=template_from_url(theme),
+            )
+            return options, bar
     else:
         bar = px.bar(
+            x=None,
+            y=None,
             title='No Data Available',
             template=template_from_url(theme),
         )
