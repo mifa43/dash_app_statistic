@@ -288,14 +288,14 @@ class Analytic(CleanData):
         self.df["Tim"] = self.df["Menadzer"].map(inverzno_mapiranje)
 
         # Filtriranje podataka po datum
-        self.df = self.df[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date)]
+        self.df = self.df[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date) & (self.df["Datum obuke"].notna())]
 
         # Ako je izabrani tim definisan, primenite filtriranje
         if selected_team:
-            self.df = self.df[self.df["Tim"] == selected_team]
+            new_df = self.df[self.df["Tim"] == selected_team]
 
         # Kreiranje DataFrame-a sa grupisanim podacima
-        grupisani_df = self.df.groupby(["Tim", "Menadzer"]).size().reset_index(name="Broj dodeljenih ljudi")
+        grupisani_df = new_df.groupby(["Tim", "Menadzer"]).size().reset_index(name="Broj dodeljenih ljudi")
         # print(grupisani_df)
         return grupisani_df
 
