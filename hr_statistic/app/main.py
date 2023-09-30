@@ -129,6 +129,12 @@ app.layout = html.Div([
         children=html.Div(id="loading-output-4"),
         fullscreen=True
     ),
+    dcc.Loading(
+        id="loading-before-bar-plot",
+        type="default",
+        children=html.Div(id="loading-output-5"),
+        fullscreen=True
+    ),
     dcc.Graph(id="line-plot", className="m-4", style={"width": "94.9%"}),
 
     html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "60px", "padding": "30px"}),
@@ -508,6 +514,7 @@ def update_table(selected_column1, start_date, end_date, theme):
 @app.callback(
     Output("dropdown-bar", "options"),
     Output("bar-plot", "figure"),
+    Output("loading-before-bar-plot", "children"),
     [
         Input("dropdown-bar", "value"),
         Input("dropdown-column1", "value"),
@@ -547,13 +554,13 @@ def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
             bar.update_traces(texttemplate='%{y}', textposition='outside')
 
 
-            return options, bar 
+            return options, bar, no_update
         else:
             bar = px.bar(
                 title='Broj dodeljenih kandidata po timu',
                 template=template_from_url(theme),
             )
-            return options, bar
+            return options, bar, no_update
     else:
         bar = px.bar(
             x=None,
@@ -561,7 +568,7 @@ def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
             title='No Data Available',
             template=template_from_url(theme),
         )
-        return [],bar
+        return [], bar, no_update
 
 
 # Python funkcija koja će se izvršiti kada se klikne dugme
