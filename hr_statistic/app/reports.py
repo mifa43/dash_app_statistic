@@ -93,10 +93,56 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                 
                 cell = table.cell(i+1, j)
                 cell.text = f'{data[j][i]}'
+    def bar_plot_report(self, selected_column1: str, start_date: str, end_date: str, data: list):
+        """### Funkcija koja generise izvestaj za bar plot
+        :param
+        - `selected_column1: str` -> Ime datoteke
+        - `start_date: str` -> Datum od
+        - `end_date: str` -> Datum do
+        - `data: list` -> Lista moze samo da sadrzi update_line_plot i ili update_pie_chart
+        """
+        # Prelazimo na novi list
+        self.doc.add_page_break()
+
+        # Broj kolona i redova tabele
+        row = len(data[0]) + 1
+        col = 2
+
+        # Kreiramo zaglavlje dokumenta i dodajemo naslov h1
+        section = self.doc.sections[0]
+        header = section.header
+
+        h1 = self.doc.add_heading("Izvestaj", 0)
+        h1.alignment = 1
+        h1_desoration = h1.runs[0].font
+        h1_desoration.bold = True
+
+        paragraph = self.doc.add_paragraph(f"U tabeli koja sledi u nastavku se prikazuju svi menadzeri i broj dodeljenih kandidata za tabelu {selected_column1} za vremenski period od {start_date} do {end_date}.")
+        par_decoration = paragraph.runs[0].font
+        par_decoration.name = 'Calibri'
+        par_decoration.size = Pt(12)  # Postavljamo fonta na 16 Point-a
+
+        # Dodajemo brake line
+        paragraph.add_run().add_break()
+        paragraph.add_run().add_break()
+        paragraph.add_run().add_break()
+
+        table = self.doc.add_table(rows=row, cols=col)
+        # Postavljamo prvi red kao zaglavlje tabele
+        table.rows[0].cells[0].paragraphs[0].add_run("Menadzer").bold = True
+        table.rows[0].cells[1].paragraphs[0].add_run("Broj dodeljenih kandidata").bold = True
+        
+        # Popunjavamo tabelu sa podacima
+        for i in range(len(data[0])):
+            ime = data[0][i]  # Ime iz prvog niza
+            broj = data[1][i]  # Broj iz drugog niza
+
+            # Postavljamo vrednosti u celije tabele
+            table.rows[i+1].cells[0].text = ime
+            table.rows[i+1].cells[1].text = str(broj)
 
 
-
-    def __call__(self, line_data=None, pie_data=None, both_data=None, report_list=[]) -> Any:
+    def __call__(self, line_data=None, pie_data=None, bar_data=None, both_data=None, report_list=[]) -> Any:
         
         """### Svaki put kada pozovemo instacu cuvamo fajl"""
         # Pre slanja argumenta instanciramo docx
@@ -105,7 +151,7 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
         keys_list = [list(d.keys())[0] for d in report_list]
 
         # Ako postoji u listi update_line_plot generisi samo njega
-        if "update_line_plot" in keys_list and len(keys_list) == 1 and pie_data is None:
+        if "update_line_plot" in keys_list and len(keys_list) == 1 and pie_data is None and bar_data is None:
             print("update_line_plot")
 
             line_data = report_list[0][keys_list[0]]
@@ -117,9 +163,19 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                 line_data[3], 
                 line_data[4]
                 )
-            
-        # Ako postoji u listi update_pie_chart generisi samo njega
-        elif "update_pie_chart" in keys_list and len(keys_list) == 1 and line_data is None:
+        elif "update_bar_chart" in keys_list and len(keys_list) == 1 and line_data is None and pie_data is None: 
+            print("update_bar_chart")
+
+            bar_data = report_list[0][keys_list[0]]
+
+            self.bar_plot_report(
+                bar_data[0], 
+                bar_data[1], 
+                bar_data[2], 
+                bar_data[3]
+                )   
+         # Ako postoji u listi update_pie_chart generisi samo njega
+        elif "update_pie_chart" in keys_list and len(keys_list) == 1 and line_data is None and bar_data is None:
             print("update_pie_chart")
 
             pie_data = report_list[0][keys_list[0]]
@@ -131,8 +187,8 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                 pie_data[3]
                 )
         # Ako postoji u listi update_line_plot i update_pie_chart generisi samo njega
-        elif "update_line_plot" in keys_list and "update_pie_chart" in keys_list and len(keys_list) == 2 and line_data is None and pie_data is None:
-            print("update_line_plot and update_pie_chart")
+        elif "update_line_plot" in keys_list and "update_pie_chart" in keys_list and "update_bar_chart" in keys_list and len(keys_list) == 3 and line_data is None and pie_data is None and bar_data is None:
+            print("update_line_plot and update_pie_chart and update_bar_chart")
 
             for i in range(0, len(keys_list)):
 
@@ -146,7 +202,15 @@ Rkovodilac {selected_column2} je u tabeli {selected_column1} imao\la ukupan broj
                         both_data[3], 
                         both_data[4]
                         )
-                    
+                elif "update_bar_chart" in report_list[i]:
+                    bar_data = report_list[i][keys_list[i]]
+
+                    self.bar_plot_report(
+                        bar_data[0], 
+                        bar_data[1], 
+                        bar_data[2], 
+                        bar_data[3]
+                        )   
                 elif "update_pie_chart" in report_list[i]:
                     both_data = report_list[i][keys_list[i]]
 
