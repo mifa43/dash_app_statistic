@@ -269,7 +269,7 @@ class Analytic(CleanData):
             "sparta": ["Mirče", "Slavče", "Boba", "Darko J.", "Ivan", "Darko/Boba"],
             "čukarica": ["Raša", "Pavle"],
             "štrumfovi": ["Joca Vulić", "Čeda", "Peđa", "Gogi"],
-            "voda": ["Aleksa", "Nemanja Božinovski", "Zlatko", "Darko"],
+            "voda": ["Aleksa", "Nemanja B", "Zlatko", "Darko"],
             "ztp": ["Luka", "Mira Vukmir"],
             "no_section": ["Veljović"]
             }
@@ -281,6 +281,7 @@ class Analytic(CleanData):
             "ztp": ["Milica ZTP, Mira", "Vesna"],
             "no_section": []
             }
+        
         # Kreiranje inverznog mapiranja: Menadzer -> Tim
         inverzno_mapiranje = {osoba: tim for tim, osobe in (telemarketing.items() if self.op.lower() == "telemarketing" else sales.items()) for osoba in osobe}
 
@@ -288,11 +289,11 @@ class Analytic(CleanData):
         self.df["Tim"] = self.df["Menadzer"].map(inverzno_mapiranje)
 
         # Filtriranje podataka po datum
-        self.df = self.df[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date) & (self.df["Datum obuke"].notna())]
-
+        self.df = self.df.loc[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date) & (self.df["Datum obuke"].notna())]
+        print(self.df)
         # Ako je izabrani tim definisan, primenite filtriranje
         if selected_team:
-            new_df = self.df[self.df["Tim"] == selected_team]
+            new_df = self.df.loc[self.df["Tim"] == selected_team]
 
         # Kreiranje DataFrame-a sa grupisanim podacima
         grupisani_df = new_df.groupby(["Tim", "Menadzer"]).size().reset_index(name="Broj dodeljenih ljudi")
