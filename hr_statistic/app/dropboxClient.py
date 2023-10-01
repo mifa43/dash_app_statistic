@@ -13,7 +13,7 @@ class DropBoxConnection(Analytic):
 
         APP_KEY = f"{os.getenv('DBX_APP_KEY')}"
         APP_SECRET = f"{os.getenv('DBX_APP_SECRET')}"
-        print(os.getenv('DBX_APP_SECRET'), os.getenv('DBX_APP_KEY'))
+        # print(os.getenv('DBX_APP_SECRET'), os.getenv('DBX_APP_KEY'))
         # Vraca url za autorizaciju
         self.auth_flow = DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
 
