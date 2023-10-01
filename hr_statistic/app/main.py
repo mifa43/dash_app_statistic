@@ -86,7 +86,7 @@ app.layout = html.Div([
             calendar_orientation='vertical',
             style={"padding": "10px", "margin-top": "24px"}
         ),
-        dbc.Button('Dropbox pull', id='buttonDbx', style={"border-radius": "30px", "width": "10%"}, className="m-4 dbc"),
+        dbc.Button('Dropbox pull', id='buttonDbx', style={"border-radius": "30px"}, className="m-4 dbc"),
         dbc.Modal([
             dbc.ModalHeader("Molimo vas da odobrite pristup Dropboxu !"),
             dbc.ModalBody([
@@ -101,7 +101,7 @@ app.layout = html.Div([
         id="modal",
         is_open=False,
         ),
-        dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px", "width": "10%", "margin": "0px"}, className="m-4 dbc"),
+        dbc.Button("Preuzmi izvestaj", id="btn_image",style={"border-radius": "30px", "margin": "0px"}, className="m-4 dbc"),
         dcc.Download(id="download-image")
     ], className="d-grid gap-2 d-md-flex justify-content-md"),
 
@@ -137,15 +137,18 @@ app.layout = html.Div([
     ),
     dcc.Graph(id="line-plot", className="m-4", style={"width": "94.9%"}),
 
-    html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "60px", "padding": "30px"}),
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(dcc.Graph(id='pie-graph', className="m-3", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph1', className="m-3", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph2', className="m-3", style={"width": "90%"}), md=3),
-            dbc.Col(dcc.Graph(id='pie-graph3', className="m-3", style={"width": "90%"}), md=3),
-        ], className="flex-row flex-wrap")
-    ], fluid=True),
+    html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "40px", "padding": "30px"}),
+    html.Div([
+        dcc.Tabs(id='pie-tabs', value='tab-1', children=[
+            dcc.Tab(label='Ukupan broj intervjua', value='tab-1', className="tabTxt"),
+            dcc.Tab(label='Ukupan broj primljenih', value='tab-2', className="tabTxt"),
+            dcc.Tab(label='Pristali na obuku', value='tab-3', className="tabTxt"),
+            dcc.Tab(label='odbili obuku', value='tab-4', className="tabTxt"),
+        ]),
+        html.Div(id='pie-tab-content', className="m-3")
+    ], className="container"),
+
+
     html.H2("Odnos dodeljenih ljudi po timu", style={"font-size": "40px", "padding": "30px"}),
     html.Div([
         dcc.Dropdown(
@@ -157,7 +160,7 @@ app.layout = html.Div([
             placeholder="Izaberi tim.."
         ),
         dcc.Graph(id="bar-plot", className="m-3", style={"width": "94.9%"}),
-    ]),
+    ],),
     html.Div([
         html.H2("Najcesci razlog odbijanja/odustanka od obuke", style={"font-size": "40px", "padding": "30px"}),
         dash_table.DataTable(
@@ -357,19 +360,22 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
         return figLine, no_update 
 
 @app.callback(
-    Output('pie-graph', 'figure'),
-    Output('pie-graph1', 'figure'),
-    Output('pie-graph2', 'figure'),
-    Output('pie-graph3', 'figure'),
+    # Output('pie-graph', 'figure'),
+    # Output('pie-graph1', 'figure'),
+    # Output('pie-graph2', 'figure'),
+    # Output('pie-graph3', 'figure'),
+    Output('pie-tab-content', 'children'),
     Output("loading-before-pie-plot", "children"),
     [
+        
         Input("dropdown-column1", "value"),
         Input("date-picker-range", "start_date"), 
         Input("date-picker-range", "end_date"),
+        Input('pie-tabs', 'value'),
         Input(ThemeChangerAIO.ids.radio("theme"), "value"),
     ]
 )
-def update_pie_chart(selected_column1, start_date, end_date, theme):
+def update_pie_chart(selected_column1, start_date, end_date, selected_tab, theme):
     global globalna_lista
 
     if selected_column1 is not None and start_date is not None and end_date is not None:
@@ -437,11 +443,18 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
                     if not item:
                         globalna_lista.remove(item)
         globalna_lista.append(param)
-
-        return figPie, figPie1, figPie2, figPie3, no_update
+        if selected_tab == 'tab-1':
+            return dcc.Graph(id='pie-graph', figure=figPie), no_update
+        elif selected_tab == 'tab-2':
+            return dcc.Graph(id='pie-graph1', figure=figPie1), no_update
+        elif selected_tab == 'tab-3':
+            return dcc.Graph(id='pie-graph2', figure=figPie2), no_update
+        elif selected_tab == 'tab-4':
+            return dcc.Graph(id='pie-graph3', figure=figPie3), no_update
+        # return no_update
     
     else:
-        # Ako uslov nije zadovoljen vracamo prazan pie graph sa No data porukom 
+                # Ako uslov nije zadovoljen vracamo prazan pie graph sa No data porukom 
         figPie = px.pie(
             names=["No Data"], 
             values=[100],
@@ -449,29 +462,8 @@ def update_pie_chart(selected_column1, start_date, end_date, theme):
             template=template_from_url(theme),
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
-        figPie1 = px.pie(
-            names=["No Data1"], 
-            values=[100],
-            title='No Data Available1',
-            template=template_from_url(theme),
-            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
-        )
-        figPie2 = px.pie(
-            names=["No Data1"], 
-            values=[100],
-            title='No Data Available2',
-            template=template_from_url(theme),
-            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
-        )
-        figPie3 = px.pie(
-            names=["No Data3"], 
-            values=[100],
-            title='No Data Available3',
-            template=template_from_url(theme),
-            labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
-        )
 
-        return figPie, figPie1, figPie2, figPie3, no_update
+        return dcc.Graph(id='pie-graph3', figure=figPie), no_update
 @app.callback(
     Output('data-table', 'data'),
     Output('data-table', 'tooltip_data'),
