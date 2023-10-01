@@ -524,7 +524,7 @@ def update_table(selected_column1, start_date, end_date, theme):
     ]
 )
 def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
-
+    global globalna_lista
     if dropdown_column1 is not None:
         check = lambda: ["Sparta", "Čukarica", "Štrumfovi", "Voda", "ZTP", "no_section"] if dropdown_column1 == "Komercijala" else ["Sparta", "Čukarica", "Štrumfovi", "Voda telemarketing", "ZTP", "No_section"]
         options = check()
@@ -543,7 +543,17 @@ def bar_plot(selected_team, dropdown_column1, start_date, end_date, theme):
             # Pozivanje cistih podataka
             analytic.clean()
             data = analytic.assigned_people_per_team(selected_team.lower(), start_date_object, end_date_object)
-            print(data)
+            # print(data)
+
+            param = {"update_bar_chart": [dropdown_column1, start_date_object, end_date_object, [data["Menadzer"].to_list(),data["Broj dodeljenih ljudi"].to_list()]]}
+            for item in globalna_lista:
+                if "update_bar_chart" in item:
+                    if item["update_bar_chart"]:
+                        item.pop("update_bar_chart")
+                        # Uklanjamo prazan rečnik iz liste ako postoji
+                        if not item:
+                            globalna_lista.remove(item)
+            globalna_lista.append(param)
             bar = px.bar(
                 data,
                 x="Menadzer",
@@ -586,21 +596,25 @@ def ispis_klika(n_clicks):
         # Provera sta se nalazi u listi
         has_A = any("update_line_plot" in item for item in globalna_lista)
         has_B = any("update_pie_chart" in item for item in globalna_lista)
+        has_C = any("update_bar_chart" in item for item in globalna_lista)
         # Ako postoji update_line_plot u listi vraca sortiranu lisu update_line_plot kao index 0
         globalna_lista.sort(key=lambda x: x.get("update_line_plot") is not None, reverse=True)
-        if has_A and has_B:
+        if has_A and has_B and has_C:
             
-            # print(globalna_lista)
+            print(globalna_lista)
             download_path = report(report_list=globalna_lista)
         elif has_A:
-            # print(globalna_lista)
+            print(globalna_lista)
             download_path = report(report_list=globalna_lista)
         elif has_B:
             print(globalna_lista)
             download_path = report(report_list=globalna_lista)
+        elif has_C:
+            print(globalna_lista)
+            download_path = report(report_list=globalna_lista)
         else:
             # print(globalna_lista)
-            print("Lista ne sadrži ni ključ 'update_line_plot' ni ključ 'update_pie_chart'.")
+            print("Lista ne sadrži ni ključ 'update_line_plot' ni ključ 'update_pie_chart' ni ključ 'update_pie_chart'ni ključ 'update_bar_chart'.")
         # Vraca file
         return dcc.send_file(download_path)
 # Pokretanje servera
