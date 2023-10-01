@@ -196,10 +196,10 @@ class Analytic(CleanData):
             
             # Kriterijum pretrage za svakog rukovodioca
             new_df = self.df.loc[
-                (self.df["Pojavio se"].str.lower() == "da") &
-                (self.df["Rukovodilac"] == rukovodilac) & 
+                (self.df["Rukovodilac"] == rukovodilac) &
                 (self.df["Datum zakazivanja"] >= start_date) & 
-                (self.df["Datum zakazivanja"] <= end_date)
+                (self.df["Datum zakazivanja"] <= end_date) &
+                (self.df["Pojavio se"].str.lower() == "da")
                 ]
 
             new_df_accepted = self.df.loc[
