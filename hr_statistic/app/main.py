@@ -140,14 +140,14 @@ app.layout = html.Div([
     html.H2("Odnos intervjua u zadatom vremenskom opsegu", style={"font-size": "40px", "padding": "30px"}),
     html.Div([
         dcc.Tabs(id='pie-tabs', value='tab-1', children=[
-            dcc.Tab(label='Ukupan broj intervjua', value='tab-1', className="tabTxt"),
-            dcc.Tab(label='Ukupan broj primljenih', value='tab-2', className="tabTxt"),
-            dcc.Tab(label='Pristali na obuku', value='tab-3', className="tabTxt"),
-            dcc.Tab(label='odbili obuku', value='tab-4', className="tabTxt"),
+            dcc.Tab(label='Ukupan broj intervjua', value='tab-1', className="tabTxt dbc"),
+            dcc.Tab(label='Ukupan broj primljenih', value='tab-2', className="tabTxt dbc"),
+            dcc.Tab(label='Pristali na obuku', value='tab-3', className="tabTxt dbc"),
+            dcc.Tab(label='odbili obuku', value='tab-4', className="tabTxt dbc"),
         ]),
         html.Div(id='pie-tab-content', className="m-3")
     ], className="container"),
-
+    
 
     html.H2("Odnos dodeljenih ljudi po timu", style={"font-size": "40px", "padding": "30px"}),
     html.Div([
@@ -160,7 +160,7 @@ app.layout = html.Div([
             placeholder="Izaberi tim.."
         ),
         dcc.Graph(id="bar-plot", className="m-3", style={"width": "94.9%"}),
-    ],),
+    ],className="container"),
     html.Div([
         html.H2("Najcesci razlog odbijanja/odustanka od obuke", style={"font-size": "40px", "padding": "30px"}),
         dash_table.DataTable(
