@@ -117,12 +117,12 @@ app.layout = html.Div([
         children=html.Div(id="loading-output-2"),
         fullscreen=True
     ),
-    dcc.Loading(
-        id="loading-before-pie-plot",
-        type="default",
-        children=html.Div(id="loading-output-3"),
-        fullscreen=True
-    ),
+    # dcc.Loading(
+    #     id="loading-before-pie-plot",
+    #     type="default",
+    #     children=html.Div(id="loading-output-3"),
+    #     fullscreen=True
+    # ),
     dcc.Loading(
         id="loading-before-tabel-plot",
         type="default",
@@ -147,7 +147,7 @@ app.layout = html.Div([
         ]),
         html.Div(id='pie-tab-content', className="m-3")
     ], className="container"),
-    
+
 
     html.H2("Odnos dodeljenih ljudi po timu", style={"font-size": "40px", "padding": "30px"}),
     html.Div([
@@ -365,7 +365,7 @@ def update_line_plot(selected_column1, selected_column2, start_date, end_date, t
     # Output('pie-graph2', 'figure'),
     # Output('pie-graph3', 'figure'),
     Output('pie-tab-content', 'children'),
-    Output("loading-before-pie-plot", "children"),
+    # Output("loading-before-pie-plot", "children"),
     [
         
         Input("dropdown-column1", "value"),
@@ -444,13 +444,13 @@ def update_pie_chart(selected_column1, start_date, end_date, selected_tab, theme
                         globalna_lista.remove(item)
         globalna_lista.append(param)
         if selected_tab == 'tab-1':
-            return dcc.Graph(id='pie-graph', figure=figPie), no_update
+            return dcc.Graph(id='pie-graph', figure=figPie)
         elif selected_tab == 'tab-2':
-            return dcc.Graph(id='pie-graph1', figure=figPie1), no_update
+            return dcc.Graph(id='pie-graph1', figure=figPie1)
         elif selected_tab == 'tab-3':
-            return dcc.Graph(id='pie-graph2', figure=figPie2), no_update
+            return dcc.Graph(id='pie-graph2', figure=figPie2)
         elif selected_tab == 'tab-4':
-            return dcc.Graph(id='pie-graph3', figure=figPie3), no_update
+            return dcc.Graph(id='pie-graph3', figure=figPie3)
         # return no_update
     
     else:
@@ -463,7 +463,7 @@ def update_pie_chart(selected_column1, start_date, end_date, selected_tab, theme
             labels={'names': 'Rukovodilac', 'values': 'Broj intervjua'},
         )
 
-        return dcc.Graph(id='pie-graph3', figure=figPie), no_update
+        return dcc.Graph(id='pie-graph3', figure=figPie)
 @app.callback(
     Output('data-table', 'data'),
     Output('data-table', 'tooltip_data'),
