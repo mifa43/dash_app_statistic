@@ -40,3 +40,6 @@
     font-size: 50px;
     margin-left: 1%;
 }
+#pie-tabs > div{
+    color: black;
+}
