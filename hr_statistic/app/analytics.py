@@ -289,8 +289,8 @@ class Analytic(CleanData):
         self.df["Tim"] = self.df["Menadzer"].map(inverzno_mapiranje)
 
         # Filtriranje podataka po datum
-        self.df = self.df.loc[(self.df["Datum zakazivanja"] >= start_date) & (self.df["Datum zakazivanja"] <= end_date) & (self.df["Datum obuke"].notna())]
-        print(self.df)
+        self.df = self.df.loc[(self.df["Datum obuke"] >= start_date) & (self.df["Datum obuke"] <= end_date) & (self.df["Datum obuke"].notna())]
+        # print(self.df.head(25))
         # Ako je izabrani tim definisan, primenite filtriranje
         if selected_team:
             new_df = self.df.loc[self.df["Tim"] == selected_team]
